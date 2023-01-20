@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Terrahaxs Worker
+Parameters:
+  ApiUrl:
+    Type: String
+    Default: https://api.terrahaxs.com
+  RollbarKey:
+    Type: String
+    Description: Secret Key
+    Default: '{{resolve:secretsmanager:terrahaxs:SecretString:rollbar_key}}'
+Resources:
+  KMSLambdaIAMPolicy:
+    Type: 'AWS::IAM::ManagedPolicy'
+    Properties:
+      Description: Allow lambda functions access to KMS for Queue Encryption
+      ManagedPolicyName: !Sub "TerrahaxsWorkerKMS-${AWS::Region}"
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - kms:GenerateDataKey
+              - kms:Decrypt
+            Resource:
+              - !ImportValue terrahaxs-kms-key-arn
+  WorkerFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Metadata:
+      DockerContext: ./src
+      DockerTag: latest
+      Dockerfile: Dockerfile
+    Properties:
+      FunctionName: terrahaxs-worker
+      PackageType: Image
+      Timeout: 900
+      MemorySize: 2048
+      EphemeralStorage:
+        Size: 2048
+      Tracing: Active
+      Architectures:
+        - arm64
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Enabled: true
+        #Type: Linear10PercentEvery10Minutes
+        Type: AllAtOnce
+        #Alarms:
+        #  - Ref: AliasErrorMetricGreaterThanZeroAlarm
+        #  - Ref: LatestVersionErrorMetricGreaterThanZeroAlarm
+      Environment:
+        Variables:
+          # General Settings
+          ENV: prod
+          MODE: sns
+          ROLLBAR_KEY: !Ref RollbarKey
+          API_URL: !Ref ApiUrl
+          VERSION: 0.0.1
+          SELF_HOSTED: false
+          REGION: !Ref "AWS::Region"
+          # Powertools settings
+          POWERTOOLS_SERVICE_NAME: terrahaxs-worker
+          LOG_LEVEL: INFO
+
+      Policies:
+        - !Ref KMSLambdaIAMPolicy
+      Events:
+        Queue:
+          Type: SNS
+          Properties:
+            Topic: !ImportValue terrahaxs-sns-topic
+            FilterPolicy:
+              event_name:
+                - worker.run
+            SqsSubscription:
+              Enabled: true
+              QueuePolicyLogicalId: QueuePolicyId
+              QueueArn: !GetAtt Queue.Arn
+              QueueUrl: !Ref Queue
+              BatchSize: 1
+  Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      DelaySeconds: 0
+      KmsMasterKeyId: alias/terrahaxs
+      QueueName: !Sub terrahaxs-worker-${AWS::Region}
+      ReceiveMessageWaitTimeSeconds: 5 #Not sure what this does
+      VisibilityTimeout: 900 # 15 minutes - length of lambda timeout
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 2
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      KmsMasterKeyId: alias/aws/sqs

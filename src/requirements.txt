@@ -1,0 +1,11 @@
+requests
+aws-lambda-powertools
+boto3
+awscli
+PyJWT
+pydantic[dotenv]
+fastapi
+uvicorn
+botocore[crt]
+rollbar
+mangum
