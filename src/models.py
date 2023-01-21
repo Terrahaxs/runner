@@ -52,7 +52,7 @@ class Command(BaseModel):
             self.command,
             shell=True,
             env=env,
-            cwd='/tmp',
+            #cwd='/tmp',
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
