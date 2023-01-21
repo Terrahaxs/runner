@@ -11,7 +11,9 @@ from src.requests import RequestFactory
 from src.models import Payload, Response
 import jwt
 
-rollbar.init(settings.rollbar_key, settings.env)
+if settings.rollbar_key is not None:
+    rollbar.init(settings.rollbar_key)
+
 app = FastAPI()
 
 @app.get('/health')
@@ -52,7 +54,6 @@ def do_work(payload: Payload):
                 headers={settings.token_header: payload.token})
     req.raise_for_status()
     
-@rollbar.lambda_function
 def handler(event, context):  # pragma: no cover
     if settings.mode == ModeEnum.api:
         try:
@@ -71,7 +72,13 @@ def handler(event, context):  # pragma: no cover
             token = body['Message']
             do_work(Payload(token=token))
     elif settings.mode == ModeEnum.github_action:
-        token = os.getenv('TOKEN')
-        do_work(Payload(token=token))
+        pass
     else:
         raise Exception("Invalid mode")
+
+if settings.rollbar_key is not None:
+    handler = rollbar.lambda_function(handler)
+
+if __name__ == "__main__":
+    token = os.getenv('TOKEN')
+    do_work(Payload(token=token))

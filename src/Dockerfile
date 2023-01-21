@@ -18,6 +18,7 @@ COPY requirements.txt gittf/requirements.txt
 RUN pip install --no-cache-dir -r gittf/requirements.txt
 
 COPY . src
+COPY api.py .
 
 FROM build as api
 CMD [ "src.api.handler" ]

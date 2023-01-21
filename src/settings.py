@@ -8,13 +8,12 @@ class ModeEnum(str, Enum):
     github_action = 'github_action'
 
 class Settings(BaseSettings):
-    env: str = Field(..., env="ENV")
     mode: ModeEnum = Field(..., env='MODE')
     rollbar_key: str = Field(None, env='ROLLBAR_KEY')
     token_header: str = 'X-Token'
 
-    api_url: str = Field(..., env='API_URL')
-    version: str = Field(..., env='VERSION')
+    api_url: str = Field("https://api.terrahaxs.com", const=True)
+    version: str = Field("v0.0.1", env='VERSION')
     self_hosted: bool = Field(True, env='SELF_HOSTED')
 
     class Config:
