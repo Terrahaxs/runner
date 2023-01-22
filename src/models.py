@@ -31,9 +31,6 @@ class Command(BaseModel):
     # atlantis and the `env` command steps.
     # https://www.runatlantis.io/docs/custom-workflows.html
     include_in_env: Optional[str] = None
-    # TODO: figure out how best to implement
-    # What we want to do is enable a way to format the output of the command
-    output_filter: Optional[str] = None
     completed: bool = False
     duration: Optional[float] = None
     exit_code: Optional[int]
