@@ -47,7 +47,7 @@ class Command(BaseModel):
 
     def run(self, env):
         start = time.perf_counter()
-        logger.debug(self.command)
+        logger.info(f"Running command: {self.command}")
         o = subprocess.run(
             self.command,
             shell=True,
@@ -65,7 +65,7 @@ class Command(BaseModel):
         if self.include_output:
             self.output += o.stdout.decode('utf-8')
 
-        logger.debug(o.stdout.decode('utf-8'))
+        logger.info(o.stdout.decode('utf-8'))
         self.duration = stop - start
         self.exit_code = o.returncode
         self.completed = True

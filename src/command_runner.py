@@ -16,8 +16,6 @@ class CommandRunnerV1:
                 r.append(step)
 
                 if (step.slug == 'terraform_plan' and step.exit_code not in [0, 2]) or (step.slug != 'terraform_plan' and step.exit_code != 0):
-                    print(step.slug)
-                    print(step.exit_code)
                     skip_non_essential = True
 
         return (not skip_non_essential), r

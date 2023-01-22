@@ -26,8 +26,7 @@ def health(): # pragma: no cover
 
 @app.post('/')
 def root(payload: Payload):
-    logger.info("Validating payload")
-    print(payload)
+    logger.debug("Validating payload")
     # NOTE: We only need to validate the payload when the worker is receiving requests in API mode.
     # This is to prevent remote code execution from bad actors. When the worker is running in SQS mode
     # we know for sure that the payload is valid.
@@ -37,7 +36,7 @@ def root(payload: Payload):
 
 
 def do_work(payload: Payload):
-    logger.info("Running job")
+    logger.debug("Running job")
     command_dict = jwt.decode(payload.token, options={"verify_signature": False})
 
     request = RequestFactory.get(command_dict)
@@ -48,7 +47,7 @@ def do_work(payload: Payload):
         steps=steps,
         conclusion = 'success' if success else 'failure'
     )
-    logger.info(response)
+    logger.debug(response)
 
     req = requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
                 headers={settings.token_header: payload.token})
