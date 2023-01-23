@@ -29,7 +29,8 @@ the Terrahaxs Worker and start the API. Here is a rough outline:
 
 ```
 # requirements.txt
-https://fastapi.tiangolo.com/
+
+git+https://github.com/terrahaxs/worker.git
 ```
 
 ```python
