@@ -1,9 +1,9 @@
 import pytest
 from datetime import datetime, timedelta
 from jose import jwt
-from src.settings import settings
-from src.worker import worker
-from src.models import Payload, Command, Conclusion
+from terrahaxs_worker.settings import settings
+from terrahaxs_worker.worker import worker
+from terrahaxs_worker.models import Payload, Command, Conclusion
 
 @pytest.fixture(autouse=True)
 def mock_worker_callback(requests_mock):

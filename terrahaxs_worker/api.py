@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from src.settings import settings
-from src.models import Payload
-from src.worker import worker
+from terrahaxs_worker.settings import settings
+from terrahaxs_worker.models import Payload
+from terrahaxs_worker.worker import worker
 
 app = FastAPI()
 

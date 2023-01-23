@@ -3,7 +3,7 @@ import subprocess
 from pydantic import BaseModel, validator
 from typing import Optional
 from enum import Enum
-from src.logger import logger
+from terrahaxs_worker.logger import logger
 
 class Payload(BaseModel):
     token: str

@@ -1,10 +1,10 @@
 import jwt
 import requests
 import semver
-from src.settings import settings
-from src.logger import logger
-from src.models import Payload, Response, Request, Conclusion, Command
-from src.command_runner import CommandRunner
+from terrahaxs_worker.settings import settings
+from terrahaxs_worker.logger import logger
+from terrahaxs_worker.models import Payload, Response, Request, Conclusion, Command
+from terrahaxs_worker.command_runner import CommandRunner
 
 def validate_payload_signature(payload):
     logger.debug("Validating payload")
