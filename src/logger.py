@@ -1,3 +1,4 @@
-from aws_lambda_powertools import Logger
+import logging
 
-logger = Logger()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)

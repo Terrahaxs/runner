@@ -37,7 +37,7 @@ class Command(BaseModel):
     output: Optional[str] = ""
 
     @validator("output", always=True)
-    def _validate_output(cls, v):
+    def _validate_output(cls, v): # pragma: no cover
         if v is None:
             return ""
         return v
@@ -56,7 +56,8 @@ class Command(BaseModel):
 
         stop = time.perf_counter()
 
-        if o.returncode != 0 and self.fail_message:
+        exit_code = o.returncode
+        if (self.slug == 'terraform_plan' and exit_code not in [0, 2]) or (self.slug != 'terraform_plan' and exit_code != 0) and self.fail_message:
             self.output += self.fail_message
 
         if self.include_output:
@@ -72,6 +73,6 @@ class Response(BaseModel):
     conclusion: Conclusion
     steps: list[Command]
 
-class RequestV1(BaseModel):
+class Request(BaseModel):
     env: dict
     commands: list[Command]
