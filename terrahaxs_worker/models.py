@@ -23,7 +23,7 @@ class Command(BaseModel):
     slug: str
     command: str
     check: bool
-    fail_message: Optional[str]
+    fail_message: Optional[str] = ""
     run_on_fail: Optional[bool] = False
     include_output: Optional[bool] = True
     # This value is used to determine if the output of the command should
@@ -38,6 +38,12 @@ class Command(BaseModel):
 
     @validator("output", always=True)
     def _validate_output(cls, v): # pragma: no cover
+        if v is None:
+            return ""
+        return v
+
+    @validator("fail_message", always=True)
+    def _validate_fail_message(cls, v): # pragma: no cover
         if v is None:
             return ""
         return v

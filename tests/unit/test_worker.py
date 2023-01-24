@@ -10,12 +10,6 @@ def mock_worker_callback(requests_mock):
     adapter = requests_mock.post(f'{settings.api_url}/worker/callback')
     yield adapter
 
-def test_exception_is_raised_if_jwt_is_not_valid(requests_mock):
-    requests_mock.register_uri('POST', f"{settings.api_url}/worker/validate", json={'message': 'unathorized'}, status_code=401)
-
-    with pytest.raises(Exception):
-        worker(payload=Payload(token='foo'))
-
 @pytest.fixture(autouse=True)
 def mock_success_validation(requests_mock):
     requests_mock.post(f"{settings.api_url}/worker/validate", json={'min_worker_version': '0.0.0'})
@@ -28,13 +22,18 @@ def create_jwt(data: dict):
     encoded_jwt = jwt.encode(to_encode, 'foo', algorithm='HS256')
     return encoded_jwt
 
+def test_exception_is_raised_if_jwt_is_not_valid(requests_mock, mock_worker_callback):
+    requests_mock.register_uri('POST', f"{settings.api_url}/worker/validate", json={'message': 'unathorized'}, status_code=401)
+    worker(payload=Payload(token='foo'))
+    assert mock_worker_callback.last_request.json()['steps'][0]['output'] == 'Could not validate JWT.'
+
 def test_failure_returned_if_step_fails(mock_worker_callback):
     token = create_jwt({
             'env': {},
             'commands': [
                 Command(
-                    title='fail',
-                    slug='fail',
+                    title='Terraform Plan',
+                    slug='terraform_plan',
                     command='exit 1',
                     check=True
                 ).dict()

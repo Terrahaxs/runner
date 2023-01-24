@@ -14,5 +14,5 @@ def health(): # pragma: no cover
     }
 
 @app.post('/')
-def root(payload: Payload):
+def root(payload: Payload): # pragma: no cover
     worker(payload)
