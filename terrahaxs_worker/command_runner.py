@@ -3,7 +3,7 @@ import os
 class CommandRunner:
     def __init__(self, request):
         self.request = request
-        self.env = {**request.env, **os.environ}
+        self.env = {**os.environ, **request.env}
 
     def run(self):
         skip_non_essential = False
