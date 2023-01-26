@@ -55,7 +55,7 @@ class Command(BaseModel):
             self.command,
             shell=True,
             env=env,
-            #cwd='/tmp',
+            cwd=env['DIR'],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
