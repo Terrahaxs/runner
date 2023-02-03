@@ -50,12 +50,13 @@ class Command(BaseModel):
 
     def run(self, env):
         start = time.perf_counter()
-        logger.info(f"Running command: {self.command}")
+        dir = env['DIR'] if self.slug != 'clone' else '/'
+        logger.info(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
             shell=True,
             env=env,
-            #cwd='/tmp',
+            cwd=dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT
         )
