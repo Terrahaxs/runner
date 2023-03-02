@@ -87,7 +87,8 @@ def test_env_updated_if_included_in_env_set(mock_worker_callback):
     assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
 
 def test_all_essential_steps_are_executed(mock_worker_callback):
-    token = create_jwt({
+    req = {
+            'validation_jwt': 'foo',
             'env': {},
             'commands': [
                 Command(
@@ -104,10 +105,12 @@ def test_all_essential_steps_are_executed(mock_worker_callback):
                     run_on_fail=True
                 ).dict()
             ]
-        })
+        }
+    token = create_jwt(req) 
 
     worker(Payload(token=token))
-    
+    assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
+    worker(Payload(payload=req))
     assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
 
 

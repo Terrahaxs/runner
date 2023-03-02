@@ -1,4 +1,5 @@
 import os
+from terrahaxs_worker.models import Command
 
 class CommandRunner:
     def __init__(self, request):
@@ -11,8 +12,19 @@ class CommandRunner:
         r = []
         for command in self.request.commands:
             if not skip_non_essential or command.run_on_fail:
-                step = command.run(env=self.env)
-                r.append(step)
+                try:
+                    step = command.run(env=self.env)
+                    r.append(step)
+                except Exception as e:
+                    step = Command(
+                        title=command.title,
+                        slug=command.slug,
+                        command=command.command,
+                        check=command.check,
+                        output=str(e),
+                        exit_code=1
+                    )
+                    r.append(step)
 
                 if step.include_in_env is not None:
                     self.env[step.include_in_env] = step.output

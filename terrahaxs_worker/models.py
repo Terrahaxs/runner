@@ -6,7 +6,8 @@ from enum import Enum
 from terrahaxs_worker.logger import logger
 
 class Payload(BaseModel):
-    token: str
+    token: Optional[str]
+    payload: Optional[dict]
 
 class Conclusion(str, Enum):
     action_required = 'action_required'
@@ -50,7 +51,7 @@ class Command(BaseModel):
 
     def run(self, env):
         start = time.perf_counter()
-        dir = env['DIR'] if self.slug != 'clone' else '/'
+        dir = env['DIR'] if ('DIR' in env and self.slug != 'clone') else '/'
         logger.info(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
