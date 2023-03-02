@@ -7,7 +7,7 @@ from terrahaxs_worker.models import Payload, Response, Request, Conclusion, Comm
 from terrahaxs_worker.command_runner import CommandRunner
 
 def validate_payload_signature(payload):
-    logger.debug("Validating payload")
+    logger.info("Validating payload")
     resp = requests.post(f"{settings.api_url}/worker/validate", headers={settings.token_header: payload.token})
 
     try:
@@ -20,6 +20,7 @@ def validate_payload_signature(payload):
 
 def worker(payload: Payload):
     response = None
+    logger.info(f'Worker Version: {settings.version}')
     try:
         min_version = validate_payload_signature(payload)['min_worker_version']
 
@@ -40,7 +41,7 @@ def worker(payload: Payload):
             return requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
                     headers={settings.token_header: payload.token})
 
-        logger.debug("Running job")
+        logger.info("Running job")
         command_dict = jwt.decode(payload.token, options={"verify_signature": False})
 
         runner = CommandRunner(Request(**command_dict))
@@ -50,7 +51,7 @@ def worker(payload: Payload):
             steps=steps,
             conclusion = Conclusion.success if success else Conclusion.failure
         )
-        logger.debug(response)
+        logger.info(response)
 
     except Exception as e:
         response = Response(
