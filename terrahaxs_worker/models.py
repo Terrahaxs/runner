@@ -50,7 +50,7 @@ class Command(BaseModel):
 
     def run(self, env):
         start = time.perf_counter()
-        dir = env['DIR'] if ('DIR' in env and self.slug != 'clone') else '/'
+        dir = env['DIR'] if ('DIR' in env and self.slug not in ['clone', 'git_config']) else '/'
         logger.info(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
