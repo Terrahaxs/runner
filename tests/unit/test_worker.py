@@ -24,11 +24,12 @@ def create_jwt(data: dict):
 
 def test_exception_is_raised_if_jwt_is_not_valid(requests_mock, mock_worker_callback):
     requests_mock.register_uri('POST', f"{settings.api_url}/worker/validate", json={'message': 'unathorized'}, status_code=401)
-    worker(payload=Payload(token='foo'))
+    worker(payload=Payload(payload={'validation_jwt': 'foo'}))
     assert mock_worker_callback.last_request.json()['steps'][0]['output'] == 'Could not validate JWT.'
 
 def test_failure_returned_if_step_fails(mock_worker_callback):
-    token = create_jwt({
+    token = {
+            'validation_jwt': 'foo',
             'env': {},
             'commands': [
                 Command(
@@ -38,14 +39,15 @@ def test_failure_returned_if_step_fails(mock_worker_callback):
                     check=True
                 ).dict()
             ]
-        })
+        }
 
-    worker(Payload(token=token))
+    worker(Payload(payload=token))
     
     assert mock_worker_callback.last_request.json()['conclusion'] == Conclusion.failure
 
 def test_success_is_returned_if_all_steps_succeed(mock_worker_callback):
-    token = create_jwt({
+    token = {
+            'validation_jwt': 'foo',
             'env': {},
             'commands': [
                 Command(
@@ -55,15 +57,16 @@ def test_success_is_returned_if_all_steps_succeed(mock_worker_callback):
                     check=True
                 ).dict()
             ]
-        })
+        }
 
-    worker(Payload(token=token))
+    worker(Payload(payload=token))
     
     assert mock_worker_callback.last_request.json()['conclusion'] == Conclusion.success
 
 
 def test_env_updated_if_included_in_env_set(mock_worker_callback):
-    token = create_jwt({
+    token = {
+            'validation_jwt': 'foo',
             'env': {},
             'commands': [
                 Command(
@@ -80,9 +83,9 @@ def test_env_updated_if_included_in_env_set(mock_worker_callback):
                     check=True
                 ).dict()
             ]
-        })
+        }
 
-    worker(Payload(token=token))
+    worker(Payload(payload=token))
     
     assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
 
@@ -106,10 +109,6 @@ def test_all_essential_steps_are_executed(mock_worker_callback):
                 ).dict()
             ]
         }
-    token = create_jwt(req) 
-
-    worker(Payload(token=token))
-    assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
     worker(Payload(payload=req))
     assert 'foo' in mock_worker_callback.last_request.json()['steps'][1]['output']
 
@@ -121,7 +120,8 @@ def test_exception_raised_if_supported_version_not_met(requests_mock, mock_worke
     report to the Terrahaxs API that requirement is not met so that it can update
     the Check Run Status"""
     requests_mock.post(f"{settings.api_url}/worker/validate", json={'min_worker_version': '10.0.0'})
-    token = create_jwt({
+    token = {
+            'validation_jwt': 'foo',
             'env': {},
             'commands': [
                 Command(
@@ -131,8 +131,8 @@ def test_exception_raised_if_supported_version_not_met(requests_mock, mock_worke
                     check=True
                 ).dict()
             ]
-        })
+        }
 
-    worker(Payload(token=token))
+    worker(Payload(payload=token))
     
     assert mock_worker_callback.last_request.json()['conclusion'] == Conclusion.failure

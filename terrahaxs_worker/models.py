@@ -6,8 +6,7 @@ from enum import Enum
 from terrahaxs_worker.logger import logger
 
 class Payload(BaseModel):
-    token: Optional[str]
-    payload: Optional[dict]
+    payload: dict
 
 class Conclusion(str, Enum):
     action_required = 'action_required'
@@ -80,6 +79,7 @@ class Command(BaseModel):
 class Response(BaseModel):
     conclusion: Conclusion
     steps: list[Command]
+    request: dict
 
 class Request(BaseModel):
     env: dict

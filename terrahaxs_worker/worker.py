@@ -8,10 +8,7 @@ from terrahaxs_worker.command_runner import CommandRunner
 
 def validate_payload_signature(payload):
     logger.info("Validating payload")
-    if payload.token is not None:
-        resp = requests.post(f"{settings.api_url}/worker/validate", headers={settings.token_header: payload.token})
-    elif payload.payload is not None:
-        resp = requests.post(f"{settings.api_url}/worker/validate", headers={settings.token_header: payload.payload['validation_jwt']})
+    resp = requests.post(f"{settings.api_url}/worker/validate", headers={settings.token_header: payload.payload['validation_jwt']})
 
     try:
         resp.raise_for_status()
@@ -29,6 +26,7 @@ def worker(payload: Payload):
 
         if semver.VersionInfo.parse(settings.version).compare(min_version) < 0:
             response = Response(
+                request=payload.payload,
                 conclusion=Conclusion.failure,
                 steps=[
                     Command(
@@ -41,24 +39,18 @@ def worker(payload: Payload):
                 ]
             )
 
-            if payload.token is not None:
-                return requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
-                        headers={settings.token_header: payload.token})
-            elif payload.payload is not None:
-                return requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
-                        headers={settings.token_header: payload.payload['validation_jwt']})
+            return requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
+                    headers={settings.token_header: payload.payload['validation_jwt']})
 
         logger.info("Running job")
 
-        if payload.token is not None:
-            command_dict = jwt.decode(payload.token, options={"verify_signature": False})
-        elif payload.payload is not None:
-            command_dict = payload.payload
+        command_dict = payload.payload
 
         runner = CommandRunner(Request(**command_dict))
 
         success, steps = runner.run()
         response = Response(
+            request=payload.payload,
             steps=steps,
             conclusion = Conclusion.success if success else Conclusion.failure
         )
@@ -67,6 +59,7 @@ def worker(payload: Payload):
     except Exception as e:
         logger.error(e)
         response = Response(
+            request=payload.payload,
             conclusion=Conclusion.failure,
             steps=[
                 Command(
@@ -79,11 +72,6 @@ def worker(payload: Payload):
             ]
         )
     finally:
-        if payload.token is not None:
-            req = requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
-                        headers={settings.token_header: payload.token})
-            req.raise_for_status()
-        elif payload.payload is not None:
-            req = requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
-                        headers={settings.token_header: payload.payload['validation_jwt']})
-            req.raise_for_status()
+        req = requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
+                    headers={settings.token_header: payload.payload['validation_jwt']})
+        req.raise_for_status()
