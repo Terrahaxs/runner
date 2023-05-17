@@ -2,25 +2,24 @@ import jwt
 import requests
 import semver
 from terrahaxs_worker.settings import settings
-from terrahaxs_worker.logger import logger
 from terrahaxs_worker.models import Payload, Response, Request, Conclusion, Command
 from terrahaxs_worker.command_runner import CommandRunner
 
 def validate_payload_signature(payload):
-    logger.info("Validating payload")
+    print("Validating payload")
     resp = requests.post(f"{settings.api_url}/worker/validate", headers={settings.token_header: payload.payload['validation_jwt']})
 
     try:
         resp.raise_for_status()
     except Exception as e:
-        logger.error(e)
+        print(e)
         raise Exception("Could not validate JWT.")
 
     return resp.json()
 
 def worker(payload: Payload):
     response = None
-    logger.info(f'Worker Version: {settings.version}')
+    print(f'Worker Version: {settings.version}')
     try:
         min_version = validate_payload_signature(payload)['min_worker_version']
 
@@ -42,7 +41,7 @@ def worker(payload: Payload):
             return requests.post(f"{settings.api_url}/worker/callback", json=response.dict(),
                     headers={settings.token_header: payload.payload['validation_jwt']})
 
-        logger.info("Running job")
+        print("Running job")
 
         command_dict = payload.payload
 
@@ -54,10 +53,10 @@ def worker(payload: Payload):
             steps=steps,
             conclusion = Conclusion.success if success else Conclusion.failure
         )
-        logger.info(response)
+        print(response)
 
     except Exception as e:
-        logger.error(e)
+        print(e)
         response = Response(
             request=payload.payload,
             conclusion=Conclusion.failure,
