@@ -3,7 +3,6 @@ import subprocess
 from pydantic import BaseModel, validator
 from typing import Optional
 from enum import Enum
-from terrahaxs_worker.logger import logger
 
 class Payload(BaseModel):
     payload: dict
@@ -51,7 +50,7 @@ class Command(BaseModel):
     def run(self, env):
         start = time.perf_counter()
         dir = env['DIR'] if ('DIR' in env and self.slug not in ['clone', 'git_config']) else '/'
-        logger.info(f"Running command: {self.command} in {dir}")
+        print(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
             shell=True,
@@ -70,7 +69,7 @@ class Command(BaseModel):
         if self.include_output:
             self.output += o.stdout.decode('utf-8')
 
-        logger.info(o.stdout.decode('utf-8'))
+        print(o.stdout.decode('utf-8'))
         self.duration = stop - start
         self.exit_code = o.returncode
         self.completed = True
