@@ -18,6 +18,7 @@ setup(
         "semver",
         "fastapi",
         "uvicorn",
-        "pycryptodome==3.14.1"
+        "pycryptodome==3.14.1",
+        "aws-lambda-powertools==2.1.0",
     ]
 )

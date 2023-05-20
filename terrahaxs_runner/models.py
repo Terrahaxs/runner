@@ -47,11 +47,11 @@ class Command(BaseModel):
             return ""
         return v
 
-    def run(self, env):
+    def run(self, env, logger):
         start = time.perf_counter()
         # TODO: can I figure this out based on if I'm in GHA or not?
         dir = env['DIR'] if ('DIR' in env and self.slug not in ['clone', 'git_config']) else '/'
-        print(f"Running command: {self.command} in {dir}")
+        logger.info(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
             shell=True,
@@ -61,6 +61,8 @@ class Command(BaseModel):
             stderr=subprocess.STDOUT
         )
 
+        logger.info(o.stdout.decode('utf-8'))
+        logger.info(f"Command {self.command} finished.")
         stop = time.perf_counter()
 
         exit_code = o.returncode

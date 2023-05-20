@@ -3,6 +3,7 @@ Feature: runner works as expected
         Given allowed orgs is *
         And allowed repos is *
         And allowed projects is *
+        And a mocked terrahaxs api
 
     Scenario: runner returns failure state if step fails
         Given a worker.failed_step payload

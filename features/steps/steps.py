@@ -110,7 +110,6 @@ def step_impl(context):
 
 @then('the result is {result}')
 def step_impl(context, result):
-    print(context.result)
     assert context.result.conclusion == result, context.result.conclusion
 
 @then('there are {number} steps returned')

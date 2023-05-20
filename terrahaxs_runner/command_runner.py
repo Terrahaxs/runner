@@ -2,9 +2,10 @@ import os
 from terrahaxs_runner.models import Command
 
 class CommandRunner:
-    def __init__(self, request):
+    def __init__(self, request, logger):
         self.request = request
         self.env = {**os.environ, **request.env}
+        self.logger = logger
 
     def run(self):
         skip_non_essential = False
@@ -13,7 +14,7 @@ class CommandRunner:
         for command in self.request.commands:
             if not skip_non_essential or command.run_on_fail:
                 try:
-                    step = command.run(env=self.env)
+                    step = command.run(env=self.env, logger=self.logger)
                     r.append(step)
                 except Exception as e:
                     step = Command(

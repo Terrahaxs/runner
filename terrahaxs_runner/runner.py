@@ -9,9 +9,12 @@ from Crypto.PublicKey import RSA
 from terrahaxs_runner.settings import settings
 from terrahaxs_runner.models import Payload, Response, Request, Conclusion, Command
 from terrahaxs_runner.command_runner import CommandRunner
+from terrahaxs_runner.logger import get as get_logger
 
+logger = get_logger()
 
 def runner(payload: Payload, signature: str):
+    logger.append_keys(org=payload['org'], repo=payload['repo'], project_name=payload['project_name'])
     terrahaxs_info = get_terrahaxs_info()
     min_version = terrahaxs_info['min_runner_version']
     public_key = terrahaxs_info['public_key']
@@ -32,7 +35,6 @@ def runner(payload: Payload, signature: str):
 def get_terrahaxs_info():
     resp = requests.get(f"{settings.api_url}/health")
     resp.raise_for_status()
-    print(resp.json())
     return resp.json()
 
 def verify_payload_signature(payload, signature: str, public_key):
@@ -48,7 +50,7 @@ def verify_payload_signature(payload, signature: str, public_key):
         raise InvalidSignatureError('Payload signature is not verified')
 
 def verify_runner_version(min_version, payload):
-    print(f'runner Version: {settings.version}')
+    logger.info(f'Runner Version: {settings.version}\nMin Version: {min_version}')
 
     if semver.VersionInfo.parse(settings.version).compare(min_version) < 0:
         raise UpgradeRunnerError(payload, min_version)
@@ -78,11 +80,11 @@ def _verify(name, allowed, exception):
 
 def run(payload):
     try:
-        print("Running job")
+        logger.info(f"Running Project: {payload['project_name']}")
 
         command_dict = payload
 
-        runner = CommandRunner(Request(**command_dict))
+        runner = CommandRunner(Request(**command_dict), logger)
 
         success, steps = runner.run()
         response = Response(
@@ -90,11 +92,11 @@ def run(payload):
             steps=steps,
             conclusion = Conclusion.success if success else Conclusion.failure
         )
-        print(response)
+        logger.info(f"Project: {payload['project_name']} complete")
         return response
 
     except Exception as e:
-        print(e)
+        logger.error(e)
         response = Response(
             request=payload,
             conclusion=Conclusion.failure,
