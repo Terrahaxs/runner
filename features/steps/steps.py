@@ -7,7 +7,7 @@ import json
 import base64
 import requests_mock
 from terrahaxs_runner.runner import runner, InvalidSignatureError, OrgNotAllowedError, RepoNotAllowedError, ProjectNotAllowedError, UpgradeRunnerError
-from terrahaxs_runner.models import Payload, Command, Conclusion
+from terrahaxs_runner.models import Payload, Command
 from terrahaxs_runner.settings import settings
 
 m = requests_mock.Mocker()
@@ -112,7 +112,7 @@ def step_impl(context, payload):
 def step_impl(context):
     with m:
         try:
-            context.result = runner(context.payload, context.signature)
+            context.result = runner(Payload(payload=context.payload), context.signature)
         except Exception as e:
             print(e)
             context.result = e

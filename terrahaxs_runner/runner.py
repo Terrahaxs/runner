@@ -15,6 +15,7 @@ logger = get_logger()
 
 
 def runner(payload: Payload, signature: str):
+    payload = payload.payload
     logger.append_keys(
         org=payload['org'],
         repo=payload['repo'],
