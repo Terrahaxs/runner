@@ -2,7 +2,9 @@ from fastapi import FastAPI, Request, HTTPException
 from terrahaxs_runner.settings import settings
 from terrahaxs_runner.models import Payload
 from terrahaxs_runner.runner import runner
-from terrahaxs_runner.logger import logger
+from terrahaxs_runner.logger import get as get_logger
+
+logger = get_logger()
 
 app = FastAPI()
 
