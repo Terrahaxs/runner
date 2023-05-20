@@ -1,3 +1,3 @@
 from .api import app
-from .worker import worker
+from .runner import runner
 from .models import Payload, Command

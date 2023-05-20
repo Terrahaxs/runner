@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from terrahaxs_worker.settings import settings
-from terrahaxs_worker.models import Payload
-from terrahaxs_worker.worker import worker
+from terrahaxs_runner.settings import settings
+from terrahaxs_runner.models import Payload
+from terrahaxs_runner.runner import runner
 
 app = FastAPI()
 
@@ -15,4 +15,5 @@ def health(): # pragma: no cover
 
 @app.post('/')
 def root(payload: Payload): # pragma: no cover
-    worker(payload)
+    # TODO: get signature info and pass to runner
+    runner(payload)

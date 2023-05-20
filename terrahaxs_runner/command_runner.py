@@ -1,5 +1,5 @@
 import os
-from terrahaxs_worker.models import Command
+from terrahaxs_runner.models import Command
 
 class CommandRunner:
     def __init__(self, request):

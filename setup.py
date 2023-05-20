@@ -2,10 +2,10 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name="terrahaxs-worker",
-    version="0.1",
-    description="Terrahaxs Worker to execute Terraform CI/CD commands.",
-    packages=find_packages(exclude=["tests"]),
+    name="terrahaxs-runner",
+    version="0.0.7",
+    description="Terrahaxs runner to execute Terraform CI/CD commands.",
+    packages=find_packages(exclude=["features"]),
     include_package_data=True,
     install_requires=[
         "requests",
@@ -18,5 +18,6 @@ setup(
         "semver",
         "fastapi",
         "uvicorn",
+        "pycryptodome==3.14.1"
     ]
 )
