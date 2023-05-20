@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from terrahaxs_runner.settings import settings
 from terrahaxs_runner.models import Payload
 from terrahaxs_runner.runner import runner
@@ -15,6 +15,7 @@ def health(): # pragma: no cover
 
 @app.post('/')
 def root(request: Request, payload: Payload): # pragma: no cover
-    assert request.headers.get('X-Worker-Signature') is not None, "Missing signature header."
+    if request.headers.get('X-Worker-Signature') is None:
+        raise HTTPException(status_code=401, detail="Terrahaxs signature could not be verified.")
 
     runner(payload, request.headers.get('X-Terrahaxs-Signature'))

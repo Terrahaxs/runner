@@ -1,4 +1,4 @@
-Feature: runner is security features
+Feature: runner security features
     Background:
         Given a worker.request payload
         And a mocked terrahaxs api

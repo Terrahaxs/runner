@@ -5,7 +5,7 @@ def get():
     # Note: For some reason logging in GitHub Actions doesn't work unless
     # you use the print statement
     print('calling get')
-    if os.getenv('GITHUB_ACTIONS') is not None:
+    if os.getenv('GITHUB_ACTIONS') is not None: # pragma: no cover
         print('using custom logger')
         class Logger:
             def __init__(self):
