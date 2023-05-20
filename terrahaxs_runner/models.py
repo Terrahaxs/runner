@@ -4,8 +4,10 @@ from pydantic import BaseModel, validator
 from typing import Optional
 from enum import Enum
 
+
 class Payload(BaseModel):
     payload: dict
+
 
 class Conclusion(str, Enum):
     action_required = 'action_required'
@@ -16,6 +18,7 @@ class Conclusion(str, Enum):
     skipped = 'skipped'
     stale = 'stale'
     timed_out = 'timed_out'
+
 
 class Command(BaseModel):
     title: str
@@ -36,13 +39,13 @@ class Command(BaseModel):
     output: Optional[str] = ""
 
     @validator("output", always=True)
-    def _validate_output(cls, v): # pragma: no cover
+    def _validate_output(cls, v):  # pragma: no cover
         if v is None:
             return ""
         return v
 
     @validator("fail_message", always=True)
-    def _validate_fail_message(cls, v): # pragma: no cover
+    def _validate_fail_message(cls, v):  # pragma: no cover
         if v is None:
             return ""
         return v
@@ -50,7 +53,9 @@ class Command(BaseModel):
     def run(self, env, logger):
         start = time.perf_counter()
         # TODO: can I figure this out based on if I'm in GHA or not?
-        dir = env['DIR'] if ('DIR' in env and self.slug not in ['clone', 'git_config']) else '/'
+        dir = env['DIR'] if (
+            'DIR' in env and self.slug not in [
+                'clone', 'git_config']) else '/'
         logger.info(f"Running command: {self.command} in {dir}")
         o = subprocess.run(
             self.command,
@@ -66,7 +71,8 @@ class Command(BaseModel):
         stop = time.perf_counter()
 
         exit_code = o.returncode
-        if (self.slug == 'terraform_plan' and exit_code not in [0, 2]) or (self.slug != 'terraform_plan' and exit_code != 0) and self.fail_message:
+        if (self.slug == 'terraform_plan' and exit_code not in [0, 2]) or (
+                self.slug != 'terraform_plan' and exit_code != 0) and self.fail_message:
             self.output += self.fail_message
 
         if self.include_output:
@@ -77,10 +83,12 @@ class Command(BaseModel):
         self.completed = True
         return self
 
+
 class Response(BaseModel):
     conclusion: Conclusion
     steps: list[Command]
     request: dict
+
 
 class Request(BaseModel):
     env: dict

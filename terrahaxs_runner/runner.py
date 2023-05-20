@@ -13,8 +13,12 @@ from terrahaxs_runner.logger import get as get_logger
 
 logger = get_logger()
 
+
 def runner(payload: Payload, signature: str):
-    logger.append_keys(org=payload['org'], repo=payload['repo'], project_name=payload['project_name'])
+    logger.append_keys(
+        org=payload['org'],
+        repo=payload['repo'],
+        project_name=payload['project_name'])
     terrahaxs_info = get_terrahaxs_info()
     min_version = terrahaxs_info['min_runner_version']
     public_key = terrahaxs_info['public_key']
@@ -25,17 +29,21 @@ def runner(payload: Payload, signature: str):
     verify_repo(payload)
     verify_project(payload)
     response = run(payload)
-    
 
-    req = requests.post(f"{settings.api_url}/runner/callback", json=response.dict(),
-                headers={settings.token_header: payload['validation_jwt']})
-    req.raise_for_status() 
+    req = requests.post(
+        f"{settings.api_url}/runner/callback",
+        json=response.dict(),
+        headers={
+            settings.token_header: payload['validation_jwt']})
+    req.raise_for_status()
     return response
+
 
 def get_terrahaxs_info():
     resp = requests.get(f"{settings.api_url}/health")
     resp.raise_for_status()
     return resp.json()
+
 
 def verify_payload_signature(payload, signature: str, public_key):
     public_key = RSA.importKey(base64.b64decode(public_key).decode('utf-8'))
@@ -49,8 +57,10 @@ def verify_payload_signature(payload, signature: str, public_key):
     if not verified:
         raise InvalidSignatureError('Payload signature is not verified')
 
+
 def verify_runner_version(min_version, payload):
-    logger.info(f'Runner Version: {settings.version}\nMin Version: {min_version}')
+    logger.info(
+        f'Runner Version: {settings.version}\nMin Version: {min_version}')
 
     if semver.VersionInfo.parse(settings.version).compare(min_version) < 0:
         raise UpgradeRunnerError(payload, min_version)
@@ -59,11 +69,20 @@ def verify_runner_version(min_version, payload):
 def verify_org(payload):
     _verify(payload['org'], settings.allowed_orgs, OrgNotAllowedError(payload))
 
+
 def verify_repo(payload):
-    _verify(payload['repo'], settings.allowed_repos, RepoNotAllowedError(payload))
+    _verify(
+        payload['repo'],
+        settings.allowed_repos,
+        RepoNotAllowedError(payload))
+
 
 def verify_project(payload):
-    _verify(payload['project_name'], settings.allowed_projects, ProjectNotAllowedError(payload))
+    _verify(
+        payload['project_name'],
+        settings.allowed_projects,
+        ProjectNotAllowedError(payload))
+
 
 def _verify(name, allowed, exception):
     if allowed == '*':
@@ -74,9 +93,10 @@ def _verify(name, allowed, exception):
     found = False
     for o in a:
         if re.compile(o).match(name):
-            found =  True
+            found = True
     if found is False:
         raise exception
+
 
 def run(payload):
     try:
@@ -90,7 +110,7 @@ def run(payload):
         response = Response(
             request=payload,
             steps=steps,
-            conclusion = Conclusion.success if success else Conclusion.failure
+            conclusion=Conclusion.success if success else Conclusion.failure
         )
         logger.info(f"Project: {payload['project_name']} complete")
         return response
@@ -115,6 +135,7 @@ def run(payload):
 class InvalidSignatureError(Exception):
     pass
 
+
 class OrgNotAllowedError(Exception):
     def __init__(self, payload):
         message = f"This runner is not permitted to run jobs for the {payload['org']} organization"
@@ -132,8 +153,11 @@ class OrgNotAllowedError(Exception):
             ]
         )
 
-        req = requests.post(f"{settings.api_url}/runner/callback", json=response.dict(),
-                headers={settings.token_header: payload['response_jwt']})
+        req = requests.post(
+            f"{settings.api_url}/runner/callback",
+            json=response.dict(),
+            headers={
+                settings.token_header: payload['response_jwt']})
         req.raise_for_status()
 
         super().__init__(message)
@@ -155,10 +179,14 @@ class RepoNotAllowedError(Exception):
             ]
         )
 
-        req = requests.post(f"{settings.api_url}/runner/callback", json=response.dict(),
-                headers={settings.token_header: payload['response_jwt']})
+        req = requests.post(
+            f"{settings.api_url}/runner/callback",
+            json=response.dict(),
+            headers={
+                settings.token_header: payload['response_jwt']})
         req.raise_for_status()
         super().__init__(message)
+
 
 class ProjectNotAllowedError(Exception):
     def __init__(self, payload):
@@ -177,10 +205,14 @@ class ProjectNotAllowedError(Exception):
             ]
         )
 
-        req = requests.post(f"{settings.api_url}/runner/callback", json=response.dict(),
-                headers={settings.token_header: payload['response_jwt']})
+        req = requests.post(
+            f"{settings.api_url}/runner/callback",
+            json=response.dict(),
+            headers={
+                settings.token_header: payload['response_jwt']})
         req.raise_for_status()
         super().__init__(message)
+
 
 class UpgradeRunnerError(Exception):
     def __init__(self, payload, min_version):
@@ -199,7 +231,10 @@ class UpgradeRunnerError(Exception):
             ]
         )
 
-        req = requests.post(f"{settings.api_url}/runner/callback", json=response.dict(),
-                headers={settings.token_header: payload['response_jwt']})
+        req = requests.post(
+            f"{settings.api_url}/runner/callback",
+            json=response.dict(),
+            headers={
+                settings.token_header: payload['response_jwt']})
         req.raise_for_status()
         super().__init__(message)
