@@ -17,4 +17,4 @@ def health(): # pragma: no cover
 def root(request: Request, payload: Payload): # pragma: no cover
     assert request.headers.get('X-Worker-Signature') is not None, "Missing signature header."
 
-    runner(payload, request.headers.get('X-Worker-Signature'))
+    runner(payload, request.headers.get('X-Terrahaxs-Runner-Signature'))
