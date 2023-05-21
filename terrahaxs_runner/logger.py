@@ -16,10 +16,10 @@ def get():
             def error(self, message):
                 print(message)
 
-            def debug(message):
+            def debug(self, message):
                 print(message)
 
-            def append_keys(**kwargs):
+            def append_keys(self, **kwargs):
                 pass
         return Logger()
     else:
