@@ -18,6 +18,9 @@ def get():
 
             def debug(message):
                 print(message)
+
+            def append_keys(**kwargs):
+                pass
         return Logger()
     else:
         from aws_lambda_powertools import Logger
