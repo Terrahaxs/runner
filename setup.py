@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="terrahaxs-runner",
-    version="0.0.13",
+    version="0.0.14",
     description="Terrahaxs runner to execute Terraform CI/CD commands.",
     packages=find_packages(exclude=["features"]),
     include_package_data=True,
