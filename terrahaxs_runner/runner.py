@@ -79,6 +79,7 @@ def verify_repo(payload):
 
 
 def verify_project(payload):
+    logger.info(f"Verifying project {payload['project_name']} is allowed to be run")
     _verify(
         payload['project_name'],
         settings.allowed_projects,
@@ -139,7 +140,8 @@ class InvalidSignatureError(Exception):
 
 class OrgNotAllowedError(Exception):
     def __init__(self, payload):
-        message = f"This runner is not permitted to run jobs for the {payload['org']} organization"
+        message = f"This runner is not permitted to run jobs for the {payload['org']} organization. Permitted jobs are {settings.allowed_orgs}"
+        logger.info(message)
         response = Response(
             request=payload,
             conclusion=Conclusion.failure,
@@ -166,7 +168,8 @@ class OrgNotAllowedError(Exception):
 
 class RepoNotAllowedError(Exception):
     def __init__(self, payload):
-        message = f"This runner is not permitted to run jobs for the {payload['repo']} repo"
+        message = f"This runner is not permitted to run jobs for the {payload['repo']} repo. Permitted jobs are {settings.allowed_repos}"
+        logger.info(message)
         response = Response(
             request=payload,
             conclusion=Conclusion.failure,
@@ -191,7 +194,8 @@ class RepoNotAllowedError(Exception):
 
 class ProjectNotAllowedError(Exception):
     def __init__(self, payload):
-        message = f"This runner is not permitted to run project {payload['project_name']}"
+        message = f"This runner is not permitted to run project {payload['project_name']}. Permitted projects are {settings.allowed_projects}"
+        logger.info(message)
 
         response = Response(
             request=payload,
@@ -217,15 +221,15 @@ class ProjectNotAllowedError(Exception):
 
 class UpgradeRunnerError(Exception):
     def __init__(self, payload, min_version):
-        message = f"Please upgrade your runner version. The minimum supported version is {min_version}."
-
+        message = f"Please upgrade your runner version. The minimum supported version is {min_version}. Current version is {settings.version}"
+        logger.info(message)
         response = Response(
             request=payload,
             conclusion=Conclusion.failure,
             steps=[
                 Command(
-                    title='Project Not Allowed',
-                    slug='project_not_allowed',
+                    title='Upgrade Runner',
+                    slug='upgrade_runner',
                     command='',
                     check=True,
                     output=message)

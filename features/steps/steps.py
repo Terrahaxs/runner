@@ -16,7 +16,7 @@ m = requests_mock.Mocker()
 @given('the worker is not up to date')
 def step_impl(context):
     m.get(f"{settings.api_url}/health", json={
-        'min_runner_version': '0.0.9',
+        'min_runner_version': '3.0.9',
         'public_key': 'LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHZk1BMEdDU3FHU0liM0RRRUJBUVVBQTRHTkFEQ0JpUUtCZ1FDOGM5dlpTd0lnaE5zWGFJTXM0aFo1anBUcgpGMkFadStHdWtzRy9ZUWViNWxSS25Ca0pFYXFVQWlDdno4cEdnNHQxWXF3SUdEN21CQk5VUGgwMHZFSXNneHZ3CnFFbnVhVkMrK1Y2Vm5nZ1E3ZVNiYmliMDJQWnJ3Q2FmVzd3eU05TllVMTRoUEZkbm95N2FBSlFBRGNFYXVvZHkKMzJwenlJY1QvUDFQUC91T2N3SURBUUFCCi0tLS0tRU5EIFBVQkxJQyBLRVktLS0tLQo='
     })
 
