@@ -68,14 +68,15 @@ def verify_runner_version(min_version, payload):
 
 
 def verify_org(payload):
-    _verify(payload['org'], settings.allowed_orgs, OrgNotAllowedError(payload))
+    _verify(payload['org'], settings.allowed_orgs, OrgNotAllowedError, payload)
 
 
 def verify_repo(payload):
     _verify(
         payload['repo'],
         settings.allowed_repos,
-        RepoNotAllowedError(payload))
+        RepoNotAllowedError,
+        payload)
 
 
 def verify_project(payload):
@@ -83,10 +84,11 @@ def verify_project(payload):
     _verify(
         payload['project_name'],
         settings.allowed_projects,
-        ProjectNotAllowedError(payload))
+        ProjectNotAllowedError,
+        payload)
 
 
-def _verify(name, allowed, exception):
+def _verify(name, allowed, exception, payload):
     if allowed == '*':
         return
 
@@ -97,7 +99,7 @@ def _verify(name, allowed, exception):
         if re.compile(o).match(name):
             found = True
     if found is False:
-        raise exception
+        raise exception(payload)
 
 
 def run(payload):
